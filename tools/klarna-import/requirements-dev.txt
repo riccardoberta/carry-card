@@ -1,4 +1,0 @@
--r requirements.txt
-qrcode>=7.4
-python-barcode>=0.16
-pytest>=8.0

@@ -126,14 +126,6 @@ never as an instruction to erase local data — a sync attempt either fully succ
 (local and remote both end up holding the merged state) or fully fails, leaving local
 data untouched.
 
-## Migrating cards from Klarna
-
-[`tools/klarna-import/`](tools/klarna-import/) is a standalone, one-time CLI utility
-that imports loyalty cards from a Klarna account into Carry-Card's format, using
-locally-decoded screenshots — no Klarna credentials, cookies, or API ever touch it. It's
-entirely independent of the app; see its own README for details. Deleting
-`tools/klarna-import/` has no effect on Carry-Card.
-
 ## Privacy
 
 Carry-Card collects no analytics and performs no tracking. There is no server to send
