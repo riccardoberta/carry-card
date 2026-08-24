@@ -66,7 +66,10 @@ struct CardDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-        .onAppear { raiseBrightness() }
+        .onAppear {
+            raiseBrightness()
+            viewModel.markUsed(currentCard)
+        }
         .onDisappear { restoreBrightness() }
         .task(id: currentCard.code + currentCard.barcodeType.rawValue) { renderBarcode() }
     }

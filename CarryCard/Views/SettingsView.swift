@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 /// folder selected, Carry-Card simply works as a local-only app.
 struct SettingsView: View {
     @EnvironmentObject private var syncService: SyncService
+    @EnvironmentObject private var listViewModel: CardListViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var showingFolderPicker = false
@@ -41,7 +42,7 @@ struct SettingsView: View {
                         Button {
                             Task {
                                 isSyncing = true
-                                await syncService.sync()
+                                await listViewModel.syncAndReload()
                                 isSyncing = false
                             }
                         } label: {
@@ -84,7 +85,10 @@ struct SettingsView: View {
             .sheet(isPresented: $showingFolderPicker) {
                 FolderPickerView { url in
                     guard let url else { return }
-                    Task { await syncService.setFolder(url) }
+                    Task {
+                        await syncService.setFolder(url)
+                        await listViewModel.loadCards()
+                    }
                 }
             }
             .confirmationDialog(
@@ -123,6 +127,8 @@ struct SettingsView: View {
 }
 
 #Preview {
+    let viewModel = PreviewData.listViewModel
     SettingsView()
-        .environmentObject(PreviewData.listViewModel.syncService)
+        .environmentObject(viewModel.syncService)
+        .environmentObject(viewModel)
 }

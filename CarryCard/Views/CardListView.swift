@@ -10,6 +10,8 @@ struct CardListView: View {
     @State private var selectedCard: LoyaltyCard?
     @State private var pendingDeletion: LoyaltyCard?
 
+    private let gridColumns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
+
     var body: some View {
         NavigationStack {
             Group {
@@ -22,17 +24,13 @@ struct CardListView: View {
             .navigationTitle("Carry-Card")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItemGroup(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         showingSettings = true
                     } label: {
                         Image(systemName: "gearshape")
                     }
                     .accessibilityLabel("Settings")
-
-                    if !viewModel.cards.isEmpty {
-                        EditButton()
-                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -77,48 +75,68 @@ struct CardListView: View {
         .task { await viewModel.loadCards() }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
-                Task { await viewModel.syncService.sync() }
+                Task { await viewModel.syncAndReload() }
             }
         }
     }
 
     private var cardList: some View {
-        List {
-            ForEach(viewModel.cards) { card in
-                Button {
-                    selectedCard = card
-                } label: {
-                    CardRowView(card: card, imageStore: viewModel.imageStore)
-                }
-                .buttonStyle(.plain)
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(role: .destructive) {
-                        pendingDeletion = card
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                if let featured = viewModel.featuredCard {
+                    Button {
+                        selectedCard = featured
                     } label: {
-                        Label("Delete", systemImage: "trash")
+                        CardRowView(card: featured, imageStore: viewModel.imageStore, style: .featured)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                LazyVGrid(columns: gridColumns, spacing: 14) {
+                    ForEach(viewModel.cards) { card in
+                        Button {
+                            selectedCard = card
+                        } label: {
+                            CardRowView(card: card, imageStore: viewModel.imageStore, style: .grid)
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                pendingDeletion = card
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .draggable(card.id.uuidString) {
+                            CardRowView(card: card, imageStore: viewModel.imageStore, style: .grid)
+                                .frame(width: 160)
+                        }
+                        .dropDestination(for: String.self) { droppedIDs, _ in
+                            handleDrop(droppedIDs, onto: card)
+                        }
                     }
                 }
             }
-            .onMove { source, destination in
-                Task { await viewModel.move(fromOffsets: source, toOffset: destination) }
-            }
-            .onDelete { offsets in
-                if let index = offsets.first {
-                    pendingDeletion = viewModel.cards[index]
-                }
-            }
+            .padding(.horizontal)
+            .padding(.top, 4)
+            .padding(.bottom, 24)
         }
-        .listStyle(.plain)
-        .listRowSpacing(-36)
-        .scrollContentBackground(.hidden)
-        .padding(.top, 4)
         .refreshable {
-            await viewModel.syncService.sync()
-            await viewModel.loadCards()
+            await viewModel.syncAndReload()
         }
+    }
+
+    private func handleDrop(_ droppedIDStrings: [String], onto targetCard: LoyaltyCard) -> Bool {
+        guard let draggedIDString = droppedIDStrings.first,
+              let draggedID = UUID(uuidString: draggedIDString),
+              draggedID != targetCard.id,
+              let fromIndex = viewModel.cards.firstIndex(where: { $0.id == draggedID }),
+              let toIndex = viewModel.cards.firstIndex(where: { $0.id == targetCard.id })
+        else { return false }
+
+        let destination = toIndex > fromIndex ? toIndex + 1 : toIndex
+        Task { await viewModel.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: destination) }
+        return true
     }
 
     private var emptyState: some View {

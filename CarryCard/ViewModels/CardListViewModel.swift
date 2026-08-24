@@ -8,21 +8,46 @@ import Foundation
 final class CardListViewModel: ObservableObject {
     @Published private(set) var cards: [LoyaltyCard] = []
     @Published private(set) var isLoaded = false
+    @Published private(set) var featuredCard: LoyaltyCard?
 
     let cardStore: CardStore
     let imageStore: ImageStore
     let syncService: SyncService
+    private let recentlyUsedStore: RecentlyUsedStore
 
-    init(cardStore: CardStore, imageStore: ImageStore, syncService: SyncService) {
+    init(
+        cardStore: CardStore,
+        imageStore: ImageStore,
+        syncService: SyncService,
+        recentlyUsedStore: RecentlyUsedStore = RecentlyUsedStore()
+    ) {
         self.cardStore = cardStore
         self.imageStore = imageStore
         self.syncService = syncService
+        self.recentlyUsedStore = recentlyUsedStore
+    }
+
+    /// Records that `card` was just opened, so it becomes (or stays) the featured
+    /// card at the top of the list. Purely local — see `RecentlyUsedStore`.
+    func markUsed(_ card: LoyaltyCard) {
+        recentlyUsedStore.markUsed(card.id)
+        featuredCard = card
     }
 
     func loadCards() async {
         let database = await cardStore.load()
         cards = database.cards.sorted { $0.sortIndex < $1.sortIndex }
+        featuredCard = recentlyUsedStore.mostRecentCard(in: cards)
         isLoaded = true
+    }
+
+    /// Runs a sync pass and reloads the local database afterward — a sync can pull
+    /// in cards or edits from another device, and those only reach `cards` (and the
+    /// UI) once this reload happens. Call this instead of `syncService.sync()`
+    /// directly anywhere the result should be reflected on screen.
+    func syncAndReload() async {
+        await syncService.sync()
+        await loadCards()
     }
 
     /// Inserts a new card or replaces an existing one with the same id.
@@ -43,7 +68,7 @@ final class CardListViewModel: ObservableObject {
 
         try? await cardStore.save(database)
         cards = database.cards.sorted { $0.sortIndex < $1.sortIndex }
-        await syncService.sync()
+        await syncAndReload()
     }
 
     func delete(_ card: LoyaltyCard) async {
@@ -62,7 +87,7 @@ final class CardListViewModel: ObservableObject {
             }
         }
 
-        await syncService.sync()
+        await syncAndReload()
     }
 
     func move(fromOffsets source: IndexSet, toOffset destination: Int) async {
@@ -82,6 +107,6 @@ final class CardListViewModel: ObservableObject {
             }
         }
         try? await cardStore.save(database)
-        await syncService.sync()
+        await syncAndReload()
     }
 }

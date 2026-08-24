@@ -36,6 +36,7 @@
 		C1D0DDC094ADBFF011AC9D65 /* CardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB2B3531B7F469F61EB47DC /* CardStore.swift */; };
 		C4C5F1AA5B3AC095C3DC2A34 /* OneDBarcodeEncoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A0F1C81913885A3680257 /* OneDBarcodeEncoderTests.swift */; };
 		C606CAB695FCB9E5F00BAACB /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E81C51A480C1178F025917 /* CameraCaptureView.swift */; };
+		C723B81A46D68884BD1117A2 /* RecentlyUsedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31EA612D30B3D9D887879A44 /* RecentlyUsedStore.swift */; };
 		C9B09DEA08C6007FA4780820 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79DAC1F075590ADB3B8A55B4 /* Assets.xcassets */; };
 		D1246144AFDFAFC56FE0A130 /* OneDBarcodeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D09B57C6C0C2D6D15824171 /* OneDBarcodeEncoder.swift */; };
 		DC8CAAFC5BB258ABCCE474C5 /* FolderPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF3526E2BAC58E48772B7AC /* FolderPickerView.swift */; };
@@ -58,6 +59,7 @@
 /* Begin PBXFileReference section */
 		08DD779D4C8E359B38107769 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		2FB2B3531B7F469F61EB47DC /* CardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStore.swift; sourceTree = "<group>"; };
+		31EA612D30B3D9D887879A44 /* RecentlyUsedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentlyUsedStore.swift; sourceTree = "<group>"; };
 		31FCA39E669AA8DF56150EA8 /* LoyaltyCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoyaltyCard.swift; sourceTree = "<group>"; };
 		33AD394C9FDE54F38463DF2E /* CardDatabaseMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDatabaseMergeTests.swift; sourceTree = "<group>"; };
 		382C3AEE96D5FC8D3D88BC38 /* BarcodeServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeServiceTests.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				3FC14A4B71E00C53A5D7271C /* BarcodeService.swift */,
 				2FB2B3531B7F469F61EB47DC /* CardStore.swift */,
 				688610E2D01A84270346A101 /* ImageStore.swift */,
+				31EA612D30B3D9D887879A44 /* RecentlyUsedStore.swift */,
 				7334B5F23EE6E2BB80F3C32D /* SyncFolderManager.swift */,
 				08DD779D4C8E359B38107769 /* SyncService.swift */,
 			);
@@ -359,6 +362,7 @@
 				50363EB6C401919832A8E4F3 /* LoyaltyCard.swift in Sources */,
 				D1246144AFDFAFC56FE0A130 /* OneDBarcodeEncoder.swift in Sources */,
 				FBFD75134358E31FA394841B /* PreviewData.swift in Sources */,
+				C723B81A46D68884BD1117A2 /* RecentlyUsedStore.swift in Sources */,
 				4A4D16F54C586D7A54D5320A /* SettingsView.swift in Sources */,
 				BD24BDB474A588DC8B9CE067 /* SyncFolderManager.swift in Sources */,
 				9F8C0AAF0FA306E3FA25C606 /* SyncService.swift in Sources */,
