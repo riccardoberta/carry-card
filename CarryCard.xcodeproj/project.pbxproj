@@ -21,6 +21,7 @@
 		50DFA237D6891A7A13FFE907 /* BarcodeScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80B27239606C475B58FAEDA /* BarcodeScannerService.swift */; };
 		6071963BF55BF09B2AE2542C /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7A3E15195BFCBC5B689306 /* CardDetailView.swift */; };
 		70EAFCEB3CE1F16D0929D654 /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0600721ED3B6F24A9A9736A /* LogoView.swift */; };
+		78286E5735AE6CE1355136BC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 461B10EE24B28E273249737A /* PrivacyInfo.xcprivacy */; };
 		82E71944258EEE1D2D4BD7FF /* ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688610E2D01A84270346A101 /* ImageStore.swift */; };
 		866539153300320A7CE3BA93 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E8FCC930F9D147734D4E4C /* AppSettings.swift */; };
 		8D26F66D72D20269A99AA349 /* CardEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C20F22BDF332C1AF13D513E /* CardEditorViewModel.swift */; };
@@ -66,6 +67,7 @@
 		3F08FC027A21CDDC8AE5BADF /* CardListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListView.swift; sourceTree = "<group>"; };
 		3FC14A4B71E00C53A5D7271C /* BarcodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeService.swift; sourceTree = "<group>"; };
 		43ABA6E69EFCCC98B5AB0067 /* CardDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDatabase.swift; sourceTree = "<group>"; };
+		461B10EE24B28E273249737A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4D09B57C6C0C2D6D15824171 /* OneDBarcodeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneDBarcodeEncoder.swift; sourceTree = "<group>"; };
 		4F2E7CE728ED3A5F1B0F8515 /* CardListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListViewModel.swift; sourceTree = "<group>"; };
 		4FA3A31F700E5058B4737AA9 /* CardRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRowView.swift; sourceTree = "<group>"; };
@@ -78,7 +80,7 @@
 		7C7A3E15195BFCBC5B689306 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
 		83882A9587751D1DD55E22CC /* CarryCardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarryCardApp.swift; sourceTree = "<group>"; };
 		88EF7790013318B2E8A0023D /* CarryCardTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CarryCardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		8E3FD41CB9975E2C49281D67 /* CarryCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CarryCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E3FD41CB9975E2C49281D67 /* CarryCard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CarryCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90921F46210D83CC5632BDC4 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		920DCA4B5DEDE24B8D589E3D /* DeletedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletedCard.swift; sourceTree = "<group>"; };
 		A0600721ED3B6F24A9A9736A /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				79DAC1F075590ADB3B8A55B4 /* Assets.xcassets */,
+				461B10EE24B28E273249737A /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -276,6 +279,7 @@
 						ProvisioningStyle = Automatic;
 					};
 					DAE099EFA10C589790FA1CDE = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -306,6 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9B09DEA08C6007FA4780820 /* Assets.xcassets in Resources */,
+				78286E5735AE6CE1355136BC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,7 +451,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 2TZ556XY54;
 				INFOPLIST_FILE = CarryCard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -467,7 +471,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 2TZ556XY54;
 				INFOPLIST_FILE = CarryCard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
