@@ -1,0 +1,13 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.DS_Store
+
+# XcodeGen-generated project (regenerate with `xcodegen generate`)
+# Kept out of version control since it's fully derived from project.yml.
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Claude Code session state — not project content.
+.claude/
