@@ -51,8 +51,12 @@ xcodegen generate
 ### Running on your own iPhone
 
 1. In Xcode: **Settings → Accounts** → sign in with your Apple ID.
-2. Select the **CarryCard** target → **Signing & Capabilities** → choose your team under
-   *Team* (a free personal team works fine).
+2. In `project.yml`, set `DEVELOPMENT_TEAM` (under `settings.base`) to your own team ID
+   — find it in Xcode's Accounts settings after signing in, or just select your team once
+   in **Signing & Capabilities** and copy the ID it fills in. It's committed in
+   `project.yml` (currently set to the original author's) purely so command-line builds
+   don't need Xcode open to pick a team; `xcodegen generate` will otherwise overwrite
+   whatever you select in the Xcode UI on the next run.
 3. Change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` to something under your own
    reverse-DNS prefix (it currently ships as `com.riccardoberta.CarryCard`), then
    `xcodegen generate`.
