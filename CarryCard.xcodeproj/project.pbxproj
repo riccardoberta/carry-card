@@ -78,7 +78,7 @@
 		7C7A3E15195BFCBC5B689306 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
 		83882A9587751D1DD55E22CC /* CarryCardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarryCardApp.swift; sourceTree = "<group>"; };
 		88EF7790013318B2E8A0023D /* CarryCardTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CarryCardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		8E3FD41CB9975E2C49281D67 /* CarryCard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CarryCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E3FD41CB9975E2C49281D67 /* CarryCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CarryCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90921F46210D83CC5632BDC4 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		920DCA4B5DEDE24B8D589E3D /* DeletedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletedCard.swift; sourceTree = "<group>"; };
 		A0600721ED3B6F24A9A9736A /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
@@ -276,7 +276,6 @@
 						ProvisioningStyle = Automatic;
 					};
 					DAE099EFA10C589790FA1CDE = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -447,13 +446,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 2TZ556XY54;
 				INFOPLIST_FILE = CarryCard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.CarryCard;
+				PRODUCT_BUNDLE_IDENTIFIER = com.riccardoberta.CarryCard;
 				PRODUCT_NAME = CarryCard;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -467,13 +467,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 2TZ556XY54;
 				INFOPLIST_FILE = CarryCard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.CarryCard;
+				PRODUCT_BUNDLE_IDENTIFIER = com.riccardoberta.CarryCard;
 				PRODUCT_NAME = CarryCard;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -492,7 +493,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.CarryCard.Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.riccardoberta.CarryCard.Tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CarryCard.app/CarryCard";
@@ -572,7 +573,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.CarryCard.Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.riccardoberta.CarryCard.Tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CarryCard.app/CarryCard";
