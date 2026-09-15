@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Carry-Card</title>
+  <meta name="description" content="A simple loyalty-card wallet.">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2a55c9">
+  <link rel="icon" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Carry-Card">
+
+  <link rel="stylesheet" href="css/app.css">
+
+  <!-- Barcode generation (all symbologies Carry-Card supports) -->
+  <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script>
+  <!-- Barcode scanning over the camera -->
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.23.0/umd/index.min.js"></script>
+  <!-- Google Sign-In / Drive OAuth token client -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

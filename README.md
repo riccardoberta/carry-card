@@ -8,6 +8,11 @@ No payments, no accounts, no login, no server. Carry-Card stores everything loca
 your device and, optionally, syncs it through a folder you choose via the standard iOS
 Files interface — iCloud Drive, Google Drive, Dropbox, or any other File Provider.
 
+There's also a [web version](docs/) — a installable PWA with the same UI and local-first
+storage, for installing on a phone without a paid Apple Developer account. It can't use
+the Files-based sync (Safari has no File System Access API), so it syncs directly against
+a Google Drive folder via OAuth instead. See [docs/README.md](docs/README.md).
+
 ## Features
 
 - **Instant wallet view.** The card list is the first thing you see. Tap a card to get a
