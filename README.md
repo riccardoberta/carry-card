@@ -1,142 +1,134 @@
 # Carry-Card
 
-A deliberately simple loyalty-card wallet for iPhone, built natively with Swift and SwiftUI.
+A deliberately simple loyalty-card wallet, installable on your phone straight from the
+browser — no App Store, no developer account.
 
 > Open the app → see your loyalty cards → tap one → show a barcode ready to scan.
 
-No payments, no accounts, no login, no server. Carry-Card stores everything locally on
-your device and, optionally, syncs it through a folder you choose via the standard iOS
-Files interface — iCloud Drive, Google Drive, Dropbox, or any other File Provider.
+No payments, no accounts, no login, no server of its own. Carry-Card stores every card
+locally on your device and, optionally, syncs it directly with a Google Drive folder
+using your own Google sign-in.
 
-There's also a [web version](docs/) — a installable PWA with the same UI and local-first
-storage, for installing on a phone without a paid Apple Developer account. It can't use
-the Files-based sync (Safari has no File System Access API), so it syncs directly against
-a Google Drive folder via OAuth instead. See [docs/README.md](docs/README.md).
+**Live app: https://riccardoberta.github.io/carry-card/**
 
 ## Features
 
 - **Instant wallet view.** The card list is the first thing you see. Tap a card to get a
-  large, high-contrast barcode ready to scan at checkout.
-- **Scan to add.** Point the camera at a barcode (AVFoundation) and the value/type are
-  captured and remain editable before saving.
-- **Local-first.** Every card lives in `Application Support/CarryCardData/` on-device.
-  The app works fully offline; sync is optional and additive.
-- **Optional sync, no cloud API.** Pick any folder through Apple's document picker and
-  Carry-Card keeps it in step — the same mechanism works for iCloud Drive, Google Drive,
-  Dropbox, or a local File Provider, since the app only ever talks to the folder through
-  security-scoped bookmarks, never a provider-specific API.
+  large, high-contrast barcode ready to scan at checkout. The card you opened most
+  recently is pinned, enlarged, above the rest.
+- **Scan to add.** Point the camera at a barcode and the value/type are captured and
+  stay fully editable before saving.
+- **Local-first.** Every card lives in the browser's IndexedDB. The app works fully
+  offline — including rendering barcodes, which is the one thing it must always be able
+  to do — and installs to the Home Screen like a native app (Add to Home Screen).
+- **Optional sync, no server.** Paste a Google Drive folder link in Settings; sync talks
+  directly to Google's own Drive API using your Google sign-in. Carry-Card itself never
+  has a backend to talk to.
 - **Deterministic merge.** Two devices editing the same card resolve by last-write-wins;
-  deletions propagate via tombstones; a missing or unreadable remote folder never erases
-  local data.
-- **Privacy by construction.** No analytics, no tracking, no accounts. Camera and photo
-  library access are requested only when the corresponding feature is used.
+  deletions propagate via tombstones; a missing or unreachable remote folder never
+  erases local data.
+- **Privacy by construction.** No analytics, no tracking. Camera access is requested
+  only when you tap "Scan Barcode".
 
-## Requirements
+## Try it
 
-- Xcode 16 or later
-- iOS 17.0+ (device or simulator)
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) to (re)generate the `.xcodeproj` after
-  editing `project.yml`: `brew install xcodegen`
+Visit **https://riccardoberta.github.io/carry-card/** in Safari (or any modern mobile
+browser) → Share → **Add to Home Screen**. That's the whole install process.
 
-## Getting started
+## Running it locally
 
-```bash
-git clone https://github.com/riccardoberta/carry-card.git
-cd carry-card
-open CarryCard.xcodeproj
-```
-
-The `.xcodeproj` is committed and ready to open directly. If you change `project.yml`,
-regenerate it with:
+No build step — it's plain HTML/CSS/JS.
 
 ```bash
-xcodegen generate
+python3 -m http.server 8765
 ```
 
-### Running on your own iPhone
-
-1. In Xcode: **Settings → Accounts** → sign in with your Apple ID.
-2. In `project.yml`, set `DEVELOPMENT_TEAM` (under `settings.base`) to your own team ID
-   — find it in Xcode's Accounts settings after signing in, or just select your team once
-   in **Signing & Capabilities** and copy the ID it fills in. It's committed in
-   `project.yml` (currently set to the original author's) purely so command-line builds
-   don't need Xcode open to pick a team; `xcodegen generate` will otherwise overwrite
-   whatever you select in the Xcode UI on the next run.
-3. Change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` to something under your own
-   reverse-DNS prefix (it currently ships as `com.riccardoberta.CarryCard`), then
-   `xcodegen generate`.
-4. Plug in your iPhone, select it as the run destination, and press ⌘R.
-5. On first launch, enable **Developer Mode** on the device if prompted
-   (Settings → Privacy & Security → Developer Mode), and trust the developer certificate
-   under Settings → General → VPN & Device Management.
-
-### Tests
-
-```bash
-xcodebuild -project CarryCard.xcodeproj -scheme CarryCard \
-  -destination 'platform=iOS Simulator,name=iPhone 17' test
-```
-
-38 unit tests cover Codable round-tripping, the sync merge algorithm (including
-tombstones and edit-after-delete), local persistence and corruption recovery, barcode
-symbology serialization, and the security-scoped bookmark lifecycle.
+Then open `http://localhost:8765`. Everything works offline-first without any setup;
+Google sign-in only works from an origin that's been authorized on the OAuth client
+(see below), so it won't complete from `localhost` unless you add that origin too.
 
 ## Architecture
 
 ```text
 Carry-Card
     ↓
-iOS Files / File Provider
-    ↓
-iCloud Drive · Google Drive · Dropbox · …
+Google Drive REST API (OAuth, your own Google sign-in)
 ```
 
-Carry-Card never speaks to a cloud provider's API directly — it only ever holds a
-security-scoped bookmark to a folder the user picked through Apple's document picker.
-Whichever provider is behind that folder is invisible to the rest of the app.
+There's no Carry-Card server anywhere in this picture — sync is a direct connection
+from your browser to Google's own API, authenticated as you.
 
 ```text
-CarryCard/
-    App/            Composition root (CarryCardApp.swift)
-    Models/         LoyaltyCard, BarcodeType, CardDatabase, DeletedCard, AppSettings
-    Views/          SwiftUI screens (list, detail, editor, scanner, settings)
-    ViewModels/      CardListViewModel, CardEditorViewModel
-    Services/       CardStore, ImageStore, BarcodeService, BarcodeScannerService,
-                    SyncFolderManager, SyncService
-    Utilities/      CodableColor, ImageUtilities, JSONCoding, OneDBarcodeEncoder
-    Resources/      Assets.xcassets (AppIcon, AccentColor)
-
-CarryCardTests/     38 unit tests (Swift Testing)
+index.html
+manifest.webmanifest   PWA metadata (name, icons, colors)
+sw.js                  offline cache — includes the barcode libraries, not just the UI shell
+css/app.css
+js/
+  model.js              LoyaltyCard shape + the deterministic merge algorithm
+  db.js                 IndexedDB wrapper (cards + logo image blobs)
+  barcodeRender.js       draws a barcode onto a canvas (bwip-js)
+  barcodeScan.js         decodes a barcode from the camera (ZXing)
+  driveSync.js           Google Drive REST v3 client
+  sync.js                sync orchestration: load, merge, write, both sides
+  config.js              Google OAuth Client ID
+  app.js                 views, routing, all UI wiring
+vendor/                 self-hosted copies of bwip-js and ZXing (see "Why vendored" below)
+icons/
 ```
 
-State management is `ObservableObject` + `@Published` throughout, injected via
-`@EnvironmentObject` from a single composition root. Filesystem work runs off the main
-actor through two Swift actors (`CardStore`, `ImageStore`); the whole target builds
-clean under Swift 6's complete concurrency checking.
+### How sync works
 
-### Barcode rendering
+Every sync does the same, deterministic thing:
 
-Core Image's built-in generators cover QR, Code 128, PDF417 and Aztec. Core Image has no
-generator for EAN-13, EAN-8, UPC-E, Code 39 or Code 93, so `OneDBarcodeEncoder` builds
-those from the published module tables into an explicit bar/space bitstring, which
-`BarcodeService` then rasterizes with nearest-neighbor scaling — never smoothed — so bar
-edges stay sharp for retail scanners.
+1. Load the local database (IndexedDB).
+2. Read `cards.json` / `deleted.json` from the Drive folder (missing or unreadable
+   remote files are treated as empty, never as "erase everything").
+3. Merge: same card on both sides → newer `updatedAt` wins. A deletion tombstone beats
+   any card version whose `updatedAt` isn't newer than the tombstone's `deletedAt`. An
+   edit made *after* a deletion (newer `updatedAt`) restores the card.
+4. Copy any logo image missing on either side.
+5. Write the merged result back to Drive, then to IndexedDB.
 
-### Sync & conflict resolution
+A sync either fully succeeds (both sides end up holding the merged state) or fully
+fails and leaves local data untouched — never a partial write.
 
-`CardDatabase.merged(with:)` is a pure, order-independent function: newer `updatedAt`
-wins per card, a deletion tombstone beats an older edit, and an edit made *after* a
-deletion restores the card. A missing or unreadable remote file is treated as empty,
-never as an instruction to erase local data — a sync attempt either fully succeeds
-(local and remote both end up holding the merged state) or fully fails, leaving local
-data untouched.
+### Why vendored, not CDN
+
+`vendor/bwip-js-min.js` and `vendor/zxing-min.js` are committed copies, not
+`<script src="https://cdn...">` tags. The service worker deliberately never caches
+cross-origin requests (that's what keeps Google/Drive calls live), so a CDN-loaded
+library could silently fail to load while offline — and rendering a barcode offline is
+the one thing this app can never be allowed to get wrong.
+
+## One-time setup for sync (you, not a user of the app)
+
+Carry-Card needs its own Google OAuth Web Client ID to let you sign into Drive:
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → create a project.
+2. **APIs & Services → OAuth consent screen** → User type *External* → fill the
+   required fields → **stay in "Testing" publishing status** (don't submit for
+   verification — for a personal/family app this is the normal, supported way to run it
+   indefinitely) → under **Test users**, add every Google account that should be able to
+   sign in.
+3. **APIs & Services → Credentials → Create Credentials → OAuth Client ID** → Application
+   type **Web application** → under **Authorized JavaScript origins**, add the exact
+   origin the app is served from (e.g. `https://riccardoberta.github.io` — no path, no
+   trailing slash).
+4. Put the Client ID in `js/config.js` (it's meant to be public — it identifies the app,
+   it isn't a secret).
+
+Only the test users you explicitly added can sign in; everyone else gets a clear
+"not permitted" screen from Google.
+
+### Hosting (GitHub Pages)
+
+Repo → **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main`,
+folder: **`/ (root)`**.
 
 ## Privacy
 
-Carry-Card collects no analytics and performs no tracking. There is no server to send
-data to. Camera access is used only to scan barcodes; photo library access is used only
-to choose a logo. Both are requested at the moment the feature is used, not on launch.
-
-## License
-
-No license has been chosen yet — all rights reserved by default until one is added.
+Carry-Card collects no analytics and performs no tracking, and has no server of its
+own. Camera access is used only to scan barcodes. Your cards never leave your device
+unless you connect a Drive folder — after that, sync talks directly to Google, using
+your own Google account, not any account or service of Carry-Card's. See
+[PRIVACY.md](PRIVACY.md) for the full policy.

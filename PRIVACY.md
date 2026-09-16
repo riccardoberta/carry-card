@@ -1,51 +1,42 @@
 # Carry-Card Privacy Policy
 
-_Last updated: August 2026_
+_Last updated: September 2026_
 
-Carry-Card is designed to collect nothing. There is no server, no account, and no
+Carry-Card is designed to collect nothing. It has no server, no account system, and no
 analytics of any kind.
 
 ## What Carry-Card stores
 
 Your loyalty cards (merchant name, code, barcode type, and an optional logo image and
-color) are stored **only on your device**, in the app's local Application Support
-directory.
+color) are stored **only in your browser**, using IndexedDB — the same local storage
+mechanism any website uses, scoped to this app and this device. Nothing is sent
+anywhere unless you explicitly connect a sync folder (see below).
 
 ## Optional synchronization
 
-If you choose to enable synchronization, you select a folder yourself through the
-standard iOS Files picker (for example a folder in iCloud Drive, Google Drive, or
-Dropbox). Carry-Card writes your card data into that folder so you can access it from
-your other devices. Carry-Card never communicates with any cloud provider's servers or
-APIs directly — it only reads and writes files inside the folder you chose, through
-Apple's document-picker and security-scoped bookmark APIs. Whichever provider is behind
-that folder controls its own separate privacy practices for files stored there.
+If you choose to sync, you paste a link to a folder you already own or were shared in
+your own Google Drive, and sign in with your own Google account. From that point,
+Carry-Card reads and writes card data directly to Google's Drive API, authenticated as
+you — Carry-Card has no server of its own in this exchange; it's a direct connection
+between your browser and Google. Google's own privacy practices govern data stored in
+your Drive.
 
-If you never enable synchronization, no data ever leaves your device.
+If you never connect a sync folder, no data ever leaves your device.
 
-## Camera and photo library access
+## Camera access
 
-- **Camera** is used only to scan a loyalty-card barcode when you choose to add or edit
-  a card. The camera feed is processed on-device and is never recorded, stored, or
-  transmitted.
-- **Photo library** access is used only when you choose to pick an image as a card logo.
-
-Both permissions are requested only at the moment you use the corresponding feature.
+Camera access is requested only when you tap "Scan Barcode" to add or edit a card. The
+camera feed is processed on-device (in your browser) to decode the barcode and is never
+recorded, stored, or transmitted anywhere.
 
 ## Analytics and tracking
 
-Carry-Card contains no analytics SDKs, no crash reporters, no advertising identifiers,
-and no tracking of any kind. Nothing about your usage of the app is collected, and
-nothing is shared with third parties, because nothing is collected in the first place.
+Carry-Card contains no analytics scripts, no crash reporters, no advertising
+identifiers, and no tracking of any kind. Nothing about your use of the app is
+collected, because nothing is collected in the first place.
 
-## Data deletion
+## Third-party code
 
-Since all data lives on your device (and, optionally, in a cloud folder you control),
-deleting the app removes all local data. If you enabled synchronization, you can also
-delete the contents of the folder you selected at any time through the Files app or your
-cloud provider's own interface.
-
-## Contact
-
-Questions about this policy can be sent to the developer via the contact details listed
-on the [Carry-Card GitHub repository](https://github.com/riccardoberta/carry-card).
+The barcode rendering and scanning libraries (bwip-js and ZXing) run entirely in your
+browser and are bundled with the app itself — they don't make network requests or
+report anything back anywhere.
