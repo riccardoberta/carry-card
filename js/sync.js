@@ -56,8 +56,21 @@ export class SyncService {
     saveSettings({ folderLink: this.state.folderLink, lastSuccessfulSyncAt: this.state.lastSuccessfulSyncAt });
   }
 
-  /** Adopts a folder link (as pasted from Drive's "Share" menu) and syncs immediately. */
-  async setFolderLink(link) {
+  get isAuthorized() {
+    return this.client.isAuthorized;
+  }
+
+  /** Sends the page to Google's sign-in screen. Only call this directly from a
+   * button's own click handler — it navigates away immediately. The folder
+   * link (if any) should already be saved via `setFolderLinkOnly` first, since
+   * this call never returns to the caller. */
+  beginSignIn() {
+    this.client.beginAuthorization();
+  }
+
+  /** Records a folder link without syncing — used right before `beginSignIn()`
+   * so the link is there waiting when Google redirects back. */
+  setFolderLinkOnly(link) {
     const id = extractFolderId(link);
     if (!id) {
       this.state.lastErrorMessage = "That doesn't look like a Google Drive folder link.";
@@ -69,6 +82,14 @@ export class SyncService {
     this.state.lastErrorMessage = null;
     this._persist();
     this._notify();
+    return true;
+  }
+
+  /** Adopts a folder link (as pasted from Drive's "Share" menu) and syncs
+   * immediately. Only meaningful when already signed in — otherwise use
+   * `setFolderLinkOnly` + `beginSignIn` so the sign-in redirect happens first. */
+  async setFolderLink(link) {
+    if (!this.setFolderLinkOnly(link)) return false;
     await this.sync();
     return true;
   }
@@ -111,7 +132,11 @@ export class SyncService {
       this.state.lastErrorMessage = null;
     } catch (error) {
       console.error("Sync failed", error);
-      this.state.status = "failure";
+      // A background sync (app opened, tab became visible) hitting this just
+      // means the token expired — that's routine, not a real failure, and
+      // must never redirect the page on its own. Only an explicit tap on
+      // "Sync Now" / "Connect Sync Folder" (see app.js) triggers sign-in.
+      this.state.status = error?.name === "NotAuthorizedError" ? "signedOut" : "failure";
       this.state.lastErrorMessage = error?.message || String(error);
     } finally {
       this._isSyncing = false;

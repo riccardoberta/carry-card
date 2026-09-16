@@ -481,11 +481,16 @@ async function renderSettings() {
       <div class="form-section">
         <div class="label">Synchronization</div>
         <div class="form-card">
-          <div class="status-row"><span>Status</span><span class="${s.status === "success" ? "status-ok" : s.status === "failure" ? "status-warn" : "status-value"}">${statusLabel(s)}</span></div>
+          <div class="status-row"><span>Status</span><span class="${s.status === "success" ? "status-ok" : s.status === "failure" || s.status === "signedOut" ? "status-warn" : "status-value"}">${statusLabel(s)}</span></div>
           ${s.isEnabled ? `<div class="status-row"><span>Folder</span><span class="status-value">${escapeHtml(s.folderLink || "")}</span></div>` : ""}
           ${s.lastSuccessfulSyncAt ? `<div class="status-row"><span>Last Synced</span><span class="status-value">${new Date(s.lastSuccessfulSyncAt).toLocaleString()}</span></div>` : ""}
           ${s.lastErrorMessage ? `<div class="status-row"><span>⚠️</span><span class="status-value">${escapeHtml(s.lastErrorMessage)}</span></div>` : ""}
-          ${s.isEnabled ? `
+          ${s.isEnabled && !sync.isAuthorized ? `
+            <p class="helper-text">Your Google sign-in expired or hasn't happened yet on this device.</p>
+            <button class="form-row button-row" id="signin-btn">🔑 Sign In to Sync</button>
+            <button class="form-row button-row" id="change-folder-btn">Change Sync Folder</button>
+            <button class="form-row button-row danger-button" id="disconnect-btn">Disconnect Sync Folder</button>
+          ` : s.isEnabled ? `
             <button class="form-row button-row" id="sync-now-btn">🔄 Sync Now</button>
             <button class="form-row button-row" id="change-folder-btn">Change Sync Folder</button>
             <button class="form-row button-row danger-button" id="disconnect-btn">Disconnect Sync Folder</button>
@@ -511,7 +516,21 @@ async function renderSettings() {
 
   screen.querySelector("#done-btn").onclick = () => { route = { name: "list" }; render(); };
 
-  if (s.isEnabled) {
+  if (s.isEnabled && !sync.isAuthorized) {
+    // beginSignIn() navigates the page away immediately — nothing after this
+    // call runs, so there's no "then reload cards" step to chain here.
+    screen.querySelector("#signin-btn").onclick = () => sync.beginSignIn();
+    screen.querySelector("#change-folder-btn").onclick = () => {
+      const link = prompt("Paste the new Google Drive folder link:", s.folderLink || "");
+      if (link && sync.setFolderLinkOnly(link)) sync.beginSignIn();
+    };
+    screen.querySelector("#disconnect-btn").onclick = () => {
+      if (confirm("Disconnect the sync folder? Your cards stay on this device.")) {
+        sync.disconnect();
+        render();
+      }
+    };
+  } else if (s.isEnabled) {
     screen.querySelector("#sync-now-btn").onclick = async () => { await syncAndReload(); };
     screen.querySelector("#change-folder-btn").onclick = () => {
       const link = prompt("Paste the new Google Drive folder link:", s.folderLink || "");
@@ -524,12 +543,16 @@ async function renderSettings() {
       }
     };
   } else {
-    screen.querySelector("#connect-btn").onclick = async () => {
+    screen.querySelector("#connect-btn").onclick = () => {
       const link = screen.querySelector("#folder-link-input").value.trim();
       if (!link) return;
-      await sync.setFolderLink(link);
-      await loadCards();
-      render();
+      if (!sync.isAuthorized) {
+        // Save the link now (beginSignIn navigates away and never returns
+        // here) so it's already in place when Google redirects back.
+        if (sync.setFolderLinkOnly(link)) sync.beginSignIn();
+        return;
+      }
+      sync.setFolderLink(link).then(async () => { await loadCards(); render(); });
     };
   }
 
@@ -539,6 +562,7 @@ async function renderSettings() {
 function statusLabel(s) {
   if (s.status === "syncing") return "Syncing…";
   if (s.status === "success") return "Up to date";
+  if (s.status === "signedOut") return "Sign-in needed";
   if (s.status === "failure") return "Sync issue";
   return s.isEnabled ? "Not yet synced" : "Off";
 }

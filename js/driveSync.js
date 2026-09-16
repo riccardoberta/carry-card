@@ -14,6 +14,17 @@
 const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
 const SCOPE = "https://www.googleapis.com/auth/drive";
+const TOKEN_STORAGE_KEY = "carrycard.driveToken";
+
+/** Thrown when a Drive call needs a token we don't have. The caller (sync.js)
+ * decides what to do with this — it is never handled by silently trying to
+ * pop up a sign-in window, see NotAuthorizedError usage below for why. */
+export class NotAuthorizedError extends Error {
+  constructor() {
+    super("Not signed in to Google Drive.");
+    this.name = "NotAuthorizedError";
+  }
+}
 
 /** Pulls Google's actual error message + reason (e.g. "accessNotConfigured",
  * "insufficientPermissions", "notFound") out of a failed response body, so
@@ -42,54 +53,89 @@ export class DriveClient {
   constructor(clientId) {
     this.clientId = clientId;
     this.accessToken = null;
-    this.tokenClient = null;
+    this._expiresAt = 0;
+    this._loadStoredToken();
+    this._consumeRedirectToken();
   }
 
   get isAuthorized() {
-    return !!this.accessToken;
+    return !!this.accessToken && Date.now() < this._expiresAt;
   }
 
-  /** Requests an access token. `interactive: true` shows the Google consent
-   * popup (call this from a user gesture, e.g. a button tap); with `false` it
-   * only succeeds if a token can be issued silently. */
-  authorize({ interactive } = { interactive: true }) {
-    return new Promise((resolve, reject) => {
-      this.tokenClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: this.clientId,
-        scope: SCOPE,
-        callback: (response) => {
-          if (response.error) {
-            reject(new Error(response.error));
-            return;
-          }
-          this.accessToken = response.access_token;
-          resolve(this.accessToken);
-        },
-      });
-      this.tokenClient.requestAccessToken({ prompt: interactive ? "consent" : "" });
+  /** Sends the whole page to Google's consent screen; Google redirects back to
+   * this exact page with the token in the URL fragment (picked up by
+   * `_consumeRedirectToken` on the next load). Deliberately a full-page
+   * redirect, not a `window.open` popup: popups opened from an installed iOS
+   * "Add to Home Screen" app are unreliable — often silently blocked — a
+   * well-documented standalone-mode limitation, not something fixable from
+   * inside the popup call itself. Only call this from a direct user action
+   * (a button's own click handler), since it navigates away immediately. */
+  beginAuthorization() {
+    const redirectUri = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams({
+      client_id: this.clientId,
+      redirect_uri: redirectUri,
+      response_type: "token",
+      scope: SCOPE,
+      include_granted_scopes: "true",
+      prompt: "consent",
     });
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   }
 
   signOut() {
-    if (this.accessToken) {
-      window.google?.accounts?.oauth2?.revoke(this.accessToken, () => {});
-    }
     this.accessToken = null;
+    this._expiresAt = 0;
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+
+  _loadStoredToken() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE_KEY));
+      if (saved?.accessToken && saved.expiresAt > Date.now()) {
+        this.accessToken = saved.accessToken;
+        this._expiresAt = saved.expiresAt;
+      }
+    } catch {
+      // ignore malformed/missing storage
+    }
+  }
+
+  _storeToken() {
+    localStorage.setItem(
+      TOKEN_STORAGE_KEY,
+      JSON.stringify({ accessToken: this.accessToken, expiresAt: this._expiresAt })
+    );
+  }
+
+  /** Picks up `#access_token=...` left in the URL by Google after
+   * `beginAuthorization()` redirects back here, then scrubs it from the
+   * visible URL (it's a bearer credential — it shouldn't linger in browser
+   * history or get shared if the user copies the URL). */
+  _consumeRedirectToken() {
+    if (!window.location.hash.includes("access_token=")) return;
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const token = params.get("access_token");
+    const expiresIn = Number(params.get("expires_in") || 3600);
+    if (token) {
+      this.accessToken = token;
+      this._expiresAt = Date.now() + expiresIn * 1000;
+      this._storeToken();
+    }
+    history.replaceState(null, "", window.location.pathname + window.location.search);
   }
 
   async _fetch(url, options = {}) {
-    if (!this.accessToken) await this.authorize({ interactive: true });
-    const withAuth = (token) => ({
+    if (!this.isAuthorized) throw new NotAuthorizedError();
+    const response = await fetch(url, {
       ...options,
-      headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` },
+      headers: { ...(options.headers || {}), Authorization: `Bearer ${this.accessToken}` },
     });
-    let response = await fetch(url, withAuth(this.accessToken));
     if (response.status === 401) {
-      this.accessToken = null;
-      const fresh = await this.authorize({ interactive: false }).catch(() =>
-        this.authorize({ interactive: true })
-      );
-      response = await fetch(url, withAuth(fresh));
+      // Token expired or was revoked server-side — forget it so `isAuthorized`
+      // correctly reflects reality; the caller decides whether to re-prompt.
+      this.signOut();
+      throw new NotAuthorizedError();
     }
     return response;
   }

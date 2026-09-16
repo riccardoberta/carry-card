@@ -110,15 +110,36 @@ Carry-Card needs its own Google OAuth Web Client ID to let you sign into Drive:
    verification — for a personal/family app this is the normal, supported way to run it
    indefinitely) → under **Test users**, add every Google account that should be able to
    sign in.
-3. **APIs & Services → Credentials → Create Credentials → OAuth Client ID** → Application
-   type **Web application** → under **Authorized JavaScript origins**, add the exact
-   origin the app is served from (e.g. `https://riccardoberta.github.io` — no path, no
-   trailing slash).
-4. Put the Client ID in `js/config.js` (it's meant to be public — it identifies the app,
+3. **APIs & Services → Library** → search **Google Drive API** → **Enable**. (Creating
+   an OAuth client does *not* enable the API by itself — a very common gotcha, and the
+   #1 cause of a mysterious 403 on the very first sync.)
+4. **APIs & Services → Credentials → Create Credentials → OAuth Client ID** → Application
+   type **Web application**:
+   - **Authorized JavaScript origins**: the origin the app is served from, e.g.
+     `https://riccardoberta.github.io` — no path, no trailing slash.
+   - **Authorized redirect URIs**: the *full* app URL, e.g.
+     `https://riccardoberta.github.io/carry-card/` — trailing slash matters here. Sign-in
+     uses a full-page redirect rather than a popup (see "Why a redirect, not a popup"
+     below), and Google validates this URI exactly against this list.
+5. Put the Client ID in `js/config.js` (it's meant to be public — it identifies the app,
    it isn't a secret).
 
 Only the test users you explicitly added can sign in; everyone else gets a clear
 "not permitted" screen from Google.
+
+### Why a redirect, not a popup
+
+Sign-in navigates the whole page to Google and back, instead of opening a popup window.
+This is deliberate: popups opened with `window.open()` from an app installed via iOS's
+"Add to Home Screen" are unreliable — often silently blocked, a well-documented iOS
+standalone-mode limitation — which is exactly the failure mode of Google's own
+popup-based sign-in library in that context. The full-page redirect works reliably
+everywhere `window.open()` doesn't.
+
+Only an explicit tap on "Sync Now" / "Connect Sync Folder" / "Sign In to Sync" ever
+triggers this redirect. A background sync (app opened, tab regains focus) never
+redirects on its own — if the sign-in has expired, it just reports "Sign-in needed" in
+Settings and waits for you to tap something.
 
 ### Hosting (GitHub Pages)
 
