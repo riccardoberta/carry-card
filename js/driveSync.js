@@ -15,6 +15,21 @@ const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
 const SCOPE = "https://www.googleapis.com/auth/drive";
 
+/** Pulls Google's actual error message + reason (e.g. "accessNotConfigured",
+ * "insufficientPermissions", "notFound") out of a failed response body, so
+ * failures surface as something actionable instead of a bare HTTP status. */
+async function driveErrorDetail(res) {
+  try {
+    const body = await res.json();
+    const detail = body?.error?.errors?.[0];
+    const reason = detail?.reason || body?.error?.status;
+    const message = body?.error?.message || res.statusText;
+    return reason ? `${message} (${reason})` : `${message} (HTTP ${res.status})`;
+  } catch {
+    return `HTTP ${res.status}`;
+  }
+}
+
 export function extractFolderId(input) {
   const trimmed = input.trim();
   const match = trimmed.match(/\/folders\/([a-zA-Z0-9_-]+)/);
@@ -81,7 +96,7 @@ export class DriveClient {
 
   async getFolderName(folderId) {
     const res = await this._fetch(`${DRIVE_API}/files/${folderId}?fields=name&supportsAllDrives=true`);
-    if (!res.ok) throw new Error(`Couldn't read folder (${res.status})`);
+    if (!res.ok) throw new Error(`Couldn't read folder: ${await driveErrorDetail(res)}`);
     const data = await res.json();
     return data.name;
   }
@@ -91,7 +106,7 @@ export class DriveClient {
     const res = await this._fetch(
       `${DRIVE_API}/files?q=${q}&fields=files(id,name)&supportsAllDrives=true&includeItemsFromAllDrives=true`
     );
-    if (!res.ok) throw new Error(`Couldn't list folder contents (${res.status})`);
+    if (!res.ok) throw new Error(`Couldn't list folder contents: ${await driveErrorDetail(res)}`);
     const data = await res.json();
     return data.files?.[0] || null;
   }
@@ -104,7 +119,7 @@ export class DriveClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", parents: [parentId] }),
     });
-    if (!res.ok) throw new Error(`Couldn't create "${name}" folder (${res.status})`);
+    if (!res.ok) throw new Error(`Couldn't create "${name}" folder: ${await driveErrorDetail(res)}`);
     const created = await res.json();
     return created.id;
   }
@@ -172,6 +187,6 @@ export class DriveClient {
       headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
       body: requestBody,
     });
-    if (!res.ok) throw new Error(`Couldn't write "${name}" to Drive (${res.status})`);
+    if (!res.ok) throw new Error(`Couldn't write "${name}" to Drive: ${await driveErrorDetail(res)}`);
   }
 }
