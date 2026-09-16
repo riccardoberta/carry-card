@@ -16,11 +16,17 @@
 
   <link rel="stylesheet" href="css/app.css">
 
-  <!-- Barcode generation (all symbologies Carry-Card supports) -->
-  <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script>
-  <!-- Barcode scanning over the camera -->
-  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.23.0/umd/index.min.js"></script>
-  <!-- Google Sign-In / Drive OAuth token client -->
+  <!-- Barcode generation (all symbologies Carry-Card supports). Self-hosted (not
+       loaded from a CDN) so it's cached by the service worker and still works
+       offline — this is what actually draws the barcode on the detail screen,
+       which has to work with no connection. -->
+  <script src="vendor/bwip-js-min.js"></script>
+  <!-- Barcode scanning over the camera. Also self-hosted for the same reason —
+       adding a new card shouldn't require network either. -->
+  <script src="vendor/zxing-min.js"></script>
+  <!-- Google Sign-In / Drive OAuth token client. Deliberately NOT self-hosted:
+       sync inherently needs a live connection to Google anyway, and this script
+       is meant to be loaded fresh from Google, not pinned. -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
