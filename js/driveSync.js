@@ -41,6 +41,21 @@ async function driveErrorDetail(res) {
   }
 }
 
+/** The exact URL Google must redirect back to has to match one registered
+ * "Authorized redirect URI" — but the *same* app loads under two different
+ * URLs depending on how it was opened: a plain Safari visit lands on
+ * `.../carry-card/`, while launching from the Home Screen icon follows the
+ * manifest's `start_url` and lands on `.../carry-card/index.html`. Without
+ * this, only whichever one happened to be registered would work, and
+ * sign-in would fail with `redirect_uri_mismatch` from the other. Stripping
+ * a trailing `index.html` means only the bare directory URL ever needs to be
+ * registered, and both launch paths redirect back to that same place. */
+function normalizedRedirectUri() {
+  let path = window.location.pathname;
+  if (path.endsWith("/index.html")) path = path.slice(0, -"index.html".length);
+  return window.location.origin + path;
+}
+
 export function extractFolderId(input) {
   const trimmed = input.trim();
   const match = trimmed.match(/\/folders\/([a-zA-Z0-9_-]+)/);
@@ -71,7 +86,7 @@ export class DriveClient {
    * inside the popup call itself. Only call this from a direct user action
    * (a button's own click handler), since it navigates away immediately. */
   beginAuthorization() {
-    const redirectUri = window.location.origin + window.location.pathname;
+    const redirectUri = normalizedRedirectUri();
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: redirectUri,

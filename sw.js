@@ -2,7 +2,7 @@
 // barcode" path needs — including the barcode-drawing library — is self-hosted
 // and listed here, so it works with zero connection, not just the UI shell.
 // Never touches Google/Drive requests — those must always hit the network.
-const CACHE_NAME = "carry-card-v3";
+const CACHE_NAME = "carry-card-v4";
 const SHELL_FILES = [
   "./",
   "./index.html",
